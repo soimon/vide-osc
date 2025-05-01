@@ -73,3 +73,10 @@ async function main() {
 }
 
 main().catch(console.error);
+
+const identify =
+	(map: Record<string, number>, callback: (value: number) => void) =>
+	([key]: any) => {
+		const value = byNumberOrKey(key, map);
+		if (value !== undefined) callback(value);
+	};
