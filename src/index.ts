@@ -20,16 +20,55 @@ async function main() {
 
 	on('/freeze', ([layer]) => {
 		const num = byNumberOrKey(layer, LAYERS);
-		if (num !== undefined) resolume.setFrozen(num, true);
+		if (num !== undefined)
+			resolume.setLayerEffectProperty(num, 'freeze', 'frozensolid', 1);
 	});
 	on('/unfreeze', ([layer]) => {
 		const num = byNumberOrKey(layer, LAYERS);
-		if (num !== undefined) resolume.setFrozen(num, false);
+		if (num !== undefined)
+			resolume.setLayerEffectProperty(num, 'freeze', 'frozensolid', 0);
 	});
 
 	on('/column', ([column]) => {
 		const num = byNumberOrKey(column, COLUMNS);
 		if (num !== undefined) resolume.fireColumn(num);
+	});
+
+	on('/clip', ([layer, clip]) => {
+		const layerNum = byNumberOrKey(layer, LAYERS);
+		const clipNum = byNumberOrKey(clip, COLUMNS);
+		if (layerNum !== undefined && clipNum !== undefined)
+			resolume.fireClip(layerNum, clipNum);
+	});
+
+	on('/prop', ([layer, ...args]) => {
+		const layerNum = byNumberOrKey(layer, LAYERS);
+		const hasColumn = args.length === 4;
+		const columnNum = hasColumn
+			? byNumberOrKey(args.shift(), COLUMNS)
+			: undefined;
+		const [effect, property, value] = args;
+		if (
+			layerNum === undefined ||
+			(hasColumn && columnNum === undefined) ||
+			typeof effect !== 'string' ||
+			typeof property !== 'string' ||
+			value == undefined ||
+			args.length !== 3
+		)
+			return;
+
+		if (hasColumn && columnNum) {
+			resolume.setClipEffectProperty(
+				layerNum,
+				columnNum,
+				effect,
+				property,
+				value
+			);
+		} else {
+			resolume.setLayerEffectProperty(layerNum, effect, property, value);
+		}
 	});
 }
 
