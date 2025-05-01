@@ -29,7 +29,7 @@ async function main() {
 
 	on('/column', ([column]) => {
 		const num = byNumberOrKey(column, COLUMNS);
-		if (num !== undefined) resolume.column(num);
+		if (num !== undefined) resolume.fireColumn(num);
 	});
 }
 
