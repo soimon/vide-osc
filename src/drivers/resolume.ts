@@ -35,6 +35,7 @@ export async function connectResolume(port: number, host?: string) {
 	};
 
 	return {
+		send: destination.send,
 		fireColumn,
 		fireClip,
 		setLayerEffectProperty,

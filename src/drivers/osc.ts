@@ -51,7 +51,7 @@ const getOSCSender = async (port: number, host?: string) =>
 		osc.on('open', () => {});
 		osc.open();
 		resolve((address, args = [], types) => {
-			console.log('send', address, args, types);
+			console.log(address, args, types);
 			if (types) {
 				const typedArgs = types.map((t, i) => ({
 					type: t,

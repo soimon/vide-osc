@@ -9,14 +9,14 @@ async function main() {
 	const resolume = await connectResolume(7000, 'localhost');
 	console.log(`Server started`);
 
-	on('/print', ([message]) => {
-		console.log(message);
-	});
+	// Lights
 
 	on('/lights', ([cue]) => {
 		const num = byNumberOrKey(cue, CUES);
 		if (num !== undefined) lights.cue(num);
 	});
+
+	// Special video effects
 
 	on('/freeze', ([layer]) => {
 		const num = byNumberOrKey(layer, LAYERS);
@@ -28,6 +28,19 @@ async function main() {
 		if (num !== undefined)
 			resolume.setLayerEffectProperty(num, 'freeze', 'frozensolid', 0);
 	});
+
+	// Setup functions
+
+	on('/setup/autofocus', ([camera, value]) => {
+		if (typeof value !== 'number') return;
+		const cam = camera === 'wide' ? 3 : 4;
+		resolume.send(
+			`/composition/layers/${LAYERS.debug}/clips/${cam}/video/source/settings/focusauto`,
+			[value]
+		);
+	});
+
+	// Generic ideo cues
 
 	on('/column', ([column]) => {
 		const num = byNumberOrKey(column, COLUMNS);
