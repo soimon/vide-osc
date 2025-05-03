@@ -1,22 +1,24 @@
+import {Config, loadConfig} from './config';
 import {byNumberOrKey, connectLights} from './drivers/lights';
 import {oscInput} from './drivers/osc';
 import {connectResolume} from './drivers/resolume';
 import {COLUMNS, CUES, LAYERS} from './lists';
 
-async function main() {
-	const {on} = await oscInput(1234);
-	const lights = await connectLights(8000, '192.168.0.20');
-	const resolume = await connectResolume(7000, 'localhost');
-	console.log(`Server started`);
+const config = loadConfig('./endpoints.env');
 
-	// Lights
+async function main() {
+	const {on} = await oscInput(config.listenOn);
+	const {lights, resolume} = await connectToDrivers(config);
+	console.log('Server started');
+
+	on('/print', ([message]) => {
+		console.log(message);
+	});
 
 	on('/lights', ([cue]) => {
 		const num = byNumberOrKey(cue, CUES);
 		if (num !== undefined) lights.cue(num);
 	});
-
-	// Special video effects
 
 	on('/freeze', ([layer]) => {
 		const num = byNumberOrKey(layer, LAYERS);
@@ -28,19 +30,6 @@ async function main() {
 		if (num !== undefined)
 			resolume.setLayerEffectProperty(num, 'freeze', 'frozensolid', 0);
 	});
-
-	// Setup functions
-
-	on('/setup/autofocus', ([camera, value]) => {
-		if (typeof value !== 'number') return;
-		const cam = camera === 'wide' ? 3 : 4;
-		resolume.send(
-			`/composition/layers/${LAYERS.debug}/clips/${cam}/video/source/settings/focusauto`,
-			[value]
-		);
-	});
-
-	// Generic ideo cues
 
 	on('/column', ([column]) => {
 		const num = byNumberOrKey(column, COLUMNS);
@@ -83,6 +72,18 @@ async function main() {
 			resolume.setLayerEffectProperty(layerNum, effect, property, value);
 		}
 	});
+}
+
+async function connectToDrivers(config: Config) {
+	const lights = await connectLights(
+		config.lighting.port,
+		config.lighting.host
+	);
+	const resolume = await connectResolume(
+		config.resolume.port,
+		config.resolume.host
+	);
+	return {lights, resolume};
 }
 
 main().catch(console.error);
