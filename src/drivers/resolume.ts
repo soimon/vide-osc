@@ -13,12 +13,13 @@ export async function connectResolume(port: number, host?: string) {
 		layer: number,
 		effect: string,
 		property: string,
-		value: Argument
+		value?: Argument
 	) => {
-		destination.send(
-			addressLayer(layer).effect(effect).property(property),
-			[value]
-		);
+		value !== undefined &&
+			destination.send(
+				addressLayer(layer).effect(effect).property(property),
+				[value]
+			);
 	};
 
 	const setClipEffectProperty = (
@@ -26,12 +27,13 @@ export async function connectResolume(port: number, host?: string) {
 		clip: number,
 		effect: string,
 		property: string,
-		value: Argument
+		value?: Argument
 	) => {
-		destination.send(
-			addressClip(layer, clip).effect(effect).property(property),
-			[value]
-		);
+		value !== undefined &&
+			destination.send(
+				addressClip(layer, clip).effect(effect).property(property),
+				[value]
+			);
 	};
 
 	return {
@@ -40,6 +42,7 @@ export async function connectResolume(port: number, host?: string) {
 		fireClip,
 		setLayerEffectProperty,
 		setClipEffectProperty,
+		close: destination.close,
 	};
 }
 

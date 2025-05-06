@@ -4,25 +4,25 @@ import OSC from 'osc-js';
 // Receiver
 
 export const oscInput = async (port: number, host?: string) => {
-	const listener = await getOSCListener(port, host);
+	const osc = await getOSCListener(port, host);
 
 	return {
-		on: listener,
+		on: osc.listener,
+		close: osc.close,
 	};
 };
 
-const getOSCListener = async (
-	port: number,
-	host: string = '0.0.0.0'
-): Promise<OscEventHandler> =>
-	new Promise(resolve => {
+const getOSCListener = async (port: number, host: string = '0.0.0.0') =>
+	new Promise<{listener: OscEventHandler; close: () => void}>(resolve => {
 		const osc = new OSC({
 			plugin: new OSC.DatagramPlugin(),
 		});
 		osc.on('open', () => {
-			resolve((path, callback) =>
-				osc.on(path, (m: OSC.Message) => m && callback(m.args, m))
-			);
+			resolve({
+				listener: (path, callback) =>
+					osc.on(path, (m: OSC.Message) => m && callback(m.args, m)),
+				close: () => osc.close(),
+			});
 		});
 		osc.on('error', (err: Error) => {
 			console.log(err);
@@ -40,26 +40,36 @@ type OscEventHandler = (
 
 export const oscOutput = async (port: number, host?: string) => {
 	const sender = await getOSCSender(port, host);
-	return {send: sender, setter: convertSenderToSetter(sender)};
+	return {
+		send: sender.send,
+		setter: convertSenderToSetter(sender.send),
+		close: sender.close,
+	};
 };
 
 const getOSCSender = async (port: number, host?: string) =>
-	new Promise<Sender>(resolve => {
+	new Promise<{send: Sender; close: () => void}>(resolve => {
 		const osc = new OSC({
 			plugin: new OSC.DatagramPlugin({send: {port, host}} as any),
 		});
 		osc.on('open', () => {});
 		osc.open();
-		resolve((address, args = [], types) => {
-			console.log(address, args, types);
-			if (types) {
-				const typedArgs = types.map((t, i) => ({
-					type: t,
-					value: args[i] ?? 0,
-				}));
-				const msg = new (OSC.TypedMessage as any)(address, typedArgs);
-				osc.send(msg);
-			} else osc.send(new OSC.Message(address, ...args));
+		resolve({
+			send: (address, args = [], types) => {
+				console.log(address, args, types);
+				if (types) {
+					const typedArgs = types.map((t, i) => ({
+						type: t,
+						value: args[i] ?? 0,
+					}));
+					const msg = new (OSC.TypedMessage as any)(
+						address,
+						typedArgs
+					);
+					osc.send(msg);
+				} else osc.send(new OSC.Message(address, ...args));
+			},
+			close: () => osc.close(),
 		});
 	});
 

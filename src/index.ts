@@ -1,35 +1,41 @@
-import {Config, loadConfig} from './config';
-import {byNumberOrKey, connectLights} from './drivers/lights';
+import {registerForCleanup} from './clean-exit';
+import {loadConfig} from './config';
+import {connectToDrivers} from './drivers';
 import {oscInput} from './drivers/osc';
-import {connectResolume} from './drivers/resolume';
 import {COLUMNS, CUES, LAYERS} from './lists';
+import {byNumberOrKey} from './utils';
 
 const config = loadConfig('./endpoints.env');
 
 async function main() {
-	const {on} = await oscInput(config.listenOn);
-	const {lights, resolume} = await connectToDrivers(config);
-	console.log('Server started');
+	const osc = await oscInput(config.listenOn);
+	const on = osc.on;
+	const {lights, resolume, tweens} = await connectToDrivers(config);
+	registerForCleanup(osc, lights, resolume);
 
+	console.log('Server started');
 	on('/print', ([message]) => {
 		console.log(message);
 	});
 
+	//-----------------------------------------------------
+	// Specific properties
+
+	on('/value', tweens.create(0, v => console.log(v)).endpoint);
+	on('/asimov/frozen', ([v]) =>
+		resolume.setLayerEffectProperty(LAYERS.a, 'freeze', 'frozensolid', v)
+	);
+
+	//-----------------------------------------------------
+	// Lights
+
 	on('/lights', ([cue]) => {
-		const num = byNumberOrKey(cue, CUES);
-		if (num !== undefined) lights.cue(num);
+		const cueNumber = byNumberOrKey(cue, CUES);
+		if (cueNumber !== undefined) lights.cue(cueNumber);
 	});
 
-	on('/freeze', ([layer]) => {
-		const num = byNumberOrKey(layer, LAYERS);
-		if (num !== undefined)
-			resolume.setLayerEffectProperty(num, 'freeze', 'frozensolid', 1);
-	});
-	on('/unfreeze', ([layer]) => {
-		const num = byNumberOrKey(layer, LAYERS);
-		if (num !== undefined)
-			resolume.setLayerEffectProperty(num, 'freeze', 'frozensolid', 0);
-	});
+	//-----------------------------------------------------
+	// Generic Resolume
 
 	on('/column', ([column]) => {
 		const num = byNumberOrKey(column, COLUMNS);
@@ -74,23 +80,4 @@ async function main() {
 	});
 }
 
-async function connectToDrivers(config: Config) {
-	const lights = await connectLights(
-		config.lighting.port,
-		config.lighting.host
-	);
-	const resolume = await connectResolume(
-		config.resolume.port,
-		config.resolume.host
-	);
-	return {lights, resolume};
-}
-
 main().catch(console.error);
-
-const identify =
-	(map: Record<string, number>, callback: (value: number) => void) =>
-	([key]: any) => {
-		const value = byNumberOrKey(key, map);
-		if (value !== undefined) callback(value);
-	};
