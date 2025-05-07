@@ -36,12 +36,25 @@ export async function connectResolume(port: number, host?: string) {
 			);
 	};
 
+	const setClipSourceProperty = (
+		layer: number,
+		clip: number,
+		property: string,
+		value?: Argument
+	) => {
+		value !== undefined &&
+			destination.send(addressClip(layer, clip).property(property), [
+				value,
+			]);
+	};
+
 	return {
 		send: destination.send,
 		fireColumn,
 		fireClip,
 		setLayerEffectProperty,
 		setClipEffectProperty,
+		setClipSourceProperty,
 		close: destination.close,
 	};
 }
@@ -58,7 +71,12 @@ export const addressColumn = (column: number) => {
 };
 export const addressClip = (layer: number, clip: number) => {
 	const path = `/composition/layers/${layer}/clips/${clip}`;
-	return {effect: _effect(path), fire: () => `${path}/connect`};
+	return {
+		effect: _effect(path),
+		property: (property: string) =>
+			`${path}/video/source/settings/${property}`,
+		fire: () => `${path}/connect`,
+	};
 };
 
 const _effect = (base: string) => (effect: string) => {
