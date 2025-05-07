@@ -4,20 +4,42 @@ export const COLUMNS = {
 	off: 1,
 	split: 3,
 	'ada-solo': 4,
-	upload: 5,
-	download: 9,
+	'game1-intro': 5,
+	game1: 6,
+	'upload-intro': 7,
+	upload: 8,
+	'upload-large': 9,
+	'upload-crash': 10,
+	digifuts: 11,
+	game2: 12,
+	download: 13,
+	game3: 14,
+	trapped: 15,
+	aurelia: 16,
 	'download-aurelia': 10,
-	digifuts: 6,
 	'space-1': 7,
 } as const;
 
-const LAYER_A = 6;
+const LAYER_ADA = 6;
 export const LAYERS = {
 	monitorA: 2,
 	monitorB: 1,
-	a: LAYER_A,
-	b: LAYER_A + 1,
-	debug: 8,
+	background: LAYER_ADA - 1,
+	ada: LAYER_ADA,
+	asimov: LAYER_ADA + 1,
+	close: LAYER_ADA + 2,
+	debug: 9,
+} as const;
+
+export const SLIDES = {
+	center: {
+		ada: 0,
+		asimov: 0,
+	},
+	wide: {
+		ada: 0.17,
+		asimov: -0.33,
+	},
 } as const;
 
 // Light

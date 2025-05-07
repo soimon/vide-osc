@@ -73,8 +73,7 @@ export const addressClip = (layer: number, clip: number) => {
 	const path = `/composition/layers/${layer}/clips/${clip}`;
 	return {
 		effect: _effect(path),
-		property: (property: string) =>
-			`${path}/video/source/settings/${property}`,
+		property: (property: string) => `${path}/video/source/${property}`,
 		fire: () => `${path}/connect`,
 	};
 };

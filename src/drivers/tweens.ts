@@ -2,7 +2,7 @@ import {Easing, Group, Tween} from '@tweenjs/tween.js';
 
 export type EasingFunction = (amount: number) => number;
 export type TweenFunction = {
-	(targetValue: number, durationMs?: number | string): void;
+	(targetValue: number, durationMs?: number | string | null): void;
 	endpoint: (args: any[], message?: any) => void;
 };
 
@@ -38,12 +38,14 @@ function createTweenHandler(tweenGroup: Group) {
 
 		const tweenFn = (
 			targetValue: number,
-			durationMs: number | string = 0
+			durationMs: number | null | string = 0
 		) => {
 			const parsedDuration =
 				typeof durationMs === 'string'
 					? parseDurationString(durationMs)
-					: durationMs;
+					: durationMs !== null
+					? durationMs
+					: 0;
 
 			if (activeTween) {
 				activeTween.stop();
@@ -85,7 +87,7 @@ function createTweenHandler(tweenGroup: Group) {
 	}
 
 	function createEndpointHandler(
-		tweenFn: (value: number, duration: number | string) => void
+		tweenFn: (value: number, duration?: number | string | null) => void
 	) {
 		return function endpoint(args: any[], message?: any) {
 			const [value, duration] = args;
