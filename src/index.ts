@@ -27,6 +27,15 @@ async function main() {
 	);
 
 	//-----------------------------------------------------
+	// Setup
+
+	on('/setup/autofocus', ([camera, value]) => {
+		const layerNum = LAYERS.debug;
+		const clipNum = camera === 'wide' ? 3 : 4;
+		resolume.setClipSourceProperty(layerNum, clipNum, 'focusauto', value);
+	});
+
+	//-----------------------------------------------------
 	// Lights
 
 	on('/lights', ([cue]) => {
