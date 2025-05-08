@@ -3,6 +3,7 @@ import {registerForCleanup} from './clean-exit';
 import {loadConfig} from './config';
 import {connectToDrivers} from './drivers';
 import {oscInput} from './drivers/osc';
+import {addressLayer} from './drivers/resolume';
 import {COLUMNS, CUES, LAYERS, SLIDES} from './lists';
 import {byNumberOrKey} from './utils';
 
@@ -54,47 +55,98 @@ async function main() {
 	on('/slide/ada', adaSlide.endpoint);
 	on('/slide/asimov', asimovSlide.endpoint);
 
+	const asimovFreeze = tweens.create(
+		0,
+		(v: number) => {
+			resolume.send(
+				addressLayer(LAYERS.asimov).effect('blur').opacity(),
+				[v]
+			);
+			resolume.send(
+				addressLayer(LAYERS.asimov)
+					.effect('brightnesscontrast3')
+					.opacity(),
+				[v]
+			);
+			resolume.send(
+				addressLayer(LAYERS.asimov).effect('wavewarp').opacity(),
+				[v]
+			);
+			resolume.send(
+				addressLayer(LAYERS.asimov).effect('displace').opacity(),
+				[v]
+			);
+		},
+		Easing.Quadratic.Out
+	);
+
 	on('/frozen/asimov', ([value]) => {
-		resolume.setLayerEffectProperty(
-			LAYERS.asimov,
-			'freeze',
-			'frozensolid',
-			value
-		);
+		if (typeof value === 'number' && !isNaN(value)) {
+			asimovFreeze(value, 1000);
+			resolume.setLayerEffectProperty(
+				LAYERS.asimov,
+				'freeze',
+				'frozensolid',
+				value
+			);
+		}
 	});
 
-	const gameOneSpeed = tweens.create(0.5, (v: number) =>
-		resolume.setClipEffectProperty(
-			LAYERS.background,
-			COLUMNS.game1,
-			'tunnel',
-			'speed',
-			v
-		)
+	const gameOneSpeed = tweens.create(
+		0.5,
+		(v: number) =>
+			resolume.setClipEffectProperty(
+				LAYERS.background,
+				COLUMNS.game1,
+				'tunnel',
+				'speed',
+				1 - v
+			),
+		Easing.Quadratic.Out
 	);
-	const gameTwoSpeed = tweens.create(0.5, (v: number) =>
-		resolume.setClipEffectProperty(
-			LAYERS.background,
-			COLUMNS.game2,
-			'tunnel',
-			'speed',
-			v
-		)
+	const gameTwoSpeed = tweens.create(
+		0.5,
+		(v: number) =>
+			resolume.setClipEffectProperty(
+				LAYERS.background,
+				COLUMNS.game2,
+				'tunnel',
+				'speed',
+				1 - v
+			),
+		Easing.Quadratic.Out
 	);
 
-	const gameThreeSpeed = tweens.create(0.5, (v: number) =>
-		resolume.setClipEffectProperty(
-			LAYERS.background,
-			COLUMNS.game3,
-			'tunnel',
-			'speed',
-			v
-		)
+	const gameThreeSpeed = tweens.create(
+		0.5,
+		(v: number) =>
+			resolume.setClipEffectProperty(
+				LAYERS.background,
+				COLUMNS.game3,
+				'tunnel',
+				'speed',
+				1 - v
+			),
+		Easing.Quadratic.Out
+	);
+
+	const trapSpeed = tweens.create(
+		0.5,
+		(v: number) =>
+			resolume.setClipEffectProperty(
+				LAYERS.background,
+				COLUMNS.trapped,
+				'tunnel',
+				'speed',
+				1 - v
+			),
+		Easing.Quadratic.Out
 	);
 
 	on('/effect/gamespeed/1', gameOneSpeed.endpoint);
 	on('/effect/gamespeed/2', gameTwoSpeed.endpoint);
 	on('/effect/gamespeed/3', gameThreeSpeed.endpoint);
+	on('/effect/trapspeed', trapSpeed.endpoint);
 
 	const circleOneSpeed = tweens.create(0.31238, (v: number) =>
 		resolume.setClipSourceProperty(
@@ -117,7 +169,7 @@ async function main() {
 	const circleThreeSpeed = tweens.create(0.31238, (v: number) =>
 		resolume.setClipSourceProperty(
 			LAYERS.background,
-			COLUMNS.aurelia,
+			COLUMNS['download-aurelia'],
 			'tunnelines/frequency',
 			remapValue(v, 0, 3)
 		)
@@ -134,7 +186,10 @@ async function main() {
 		gameOneSpeed(0.5);
 		gameTwoSpeed(0.5);
 		gameThreeSpeed(0.5);
+		trapSpeed(0.5);
 	});
+
+	//0.05426 is de stand van ADA in anchorX
 
 	on('/effect/preupload', () => {
 		resolume.setClipSourceProperty(

@@ -15,8 +15,9 @@ export const COLUMNS = {
 	download: 13,
 	game3: 14,
 	trapped: 15,
-	aurelia: 16,
-	'download-aurelia': 10,
+	hunted: 16,
+	aurelia: 17,
+	'download-aurelia': 18,
 	'space-1': 7,
 } as const;
 
