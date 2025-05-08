@@ -38,7 +38,7 @@ export const SLIDES = {
 		asimov: 0,
 	},
 	wide: {
-		ada: 0.17,
+		ada: 0.23,
 		asimov: -0.33,
 	},
 } as const;
