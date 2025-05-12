@@ -15,7 +15,9 @@ async function main() {
 	const {lights, resolume, tweens} = await connectToDrivers(config);
 	registerForCleanup(osc, lights, resolume);
 
-	console.log('Server started');
+	console.log(
+		`Server started with light address ${config.lighting.host}:${config.lighting.port}`
+	);
 	on('/print', ([message]) => {
 		console.log(message);
 	});

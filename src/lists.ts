@@ -19,6 +19,7 @@ export const COLUMNS = {
 	aurelia: 17,
 	'download-aurelia': 18,
 	'space-1': 7,
+	'debug-standin': 22,
 } as const;
 
 const LAYER_ADA = 6;
@@ -73,4 +74,5 @@ export const CUES = {
 	'ombouw-voor': 101,
 	'ombouw-psych': 102,
 	'ombouw-woonkamer': 103,
+	nagesprek: 200,
 } as const;

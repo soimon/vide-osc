@@ -27,6 +27,7 @@ class Debounce {
     this.timedown := -1  ; time of last key down was sent
 
     ; requires Bind(), otherwise this = Hotkeyname in the function
+    HotIfWinActive("ahk_exe Ableton Live 12 Suite.exe")
     Hotkey(this.key, this.down.Bind(this))
     Hotkey(this.key " Up", this.up.Bind(this))
   }
@@ -68,4 +69,5 @@ time() {
 ; Example: debounce the g key using default interval of 33.3 ms
 ; Debounce("g")
 
-db := Debounce("Enter", ".", 5000, 0)
+
+db := Debounce("Space", ".", 5000, 0)
