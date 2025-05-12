@@ -243,7 +243,11 @@ async function main() {
 
 	on('/lights', ([cue]) => {
 		const cueNumber = byNumberOrKey(cue, CUES);
-		if (cueNumber !== undefined) lights.cue(cueNumber);
+		if (cueNumber === undefined) console.log(`Onbekende cue: ${cue}`);
+		else {
+			console.log(`Lichtcue ${cueNumber} (${cue})`);
+			lights.cue(cueNumber);
+		}
 	});
 
 	//-----------------------------------------------------
